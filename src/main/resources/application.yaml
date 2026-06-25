@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: currency-sync-api
+
+  # ===== Conexão com o banco (precisa bater com o docker-compose.yml) =====
+  datasource:
+    url: jdbc:postgresql://localhost:5432/currency_sync_db
+    username: washiner
+    password: washiner123
+
+  # ===== JPA / Hibernate =====
+  jpa:
+    hibernate:
+      # validate: o Hibernate só CONFERE se as tabelas existem e estão certas.
+      # Ele NUNCA cria ou altera nada -- quem faz isso é o Flyway (migrations).
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  # ===== Flyway =====
+  flyway:
+    enabled: true
+    locations: classpath:db/migration

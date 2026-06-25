@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: currency-sync-db
+    environment:
+      POSTGRES_DB: currency_sync_db
+      POSTGRES_USER: washiner
+      POSTGRES_PASSWORD: washiner123
+    ports:
+      - "5432:5432"
+    volumes:
+      - currency_sync_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U washiner -d currency_sync_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  currency_sync_data:

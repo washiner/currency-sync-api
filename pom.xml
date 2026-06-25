@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<!-- ============================================================
+	     PARENT: o Spring Boot fornece um "pai" que já define versões
+	     compatíveis entre si para várias bibliotecas. Isso evita que
+	     a gente precise escolher manualmente a versão de cada dependência
+	     (o famoso "dependency hell").
+	     ============================================================ -->
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>3.5.15</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+
+	<groupId>com.washiner</groupId>
+	<artifactId>currency-sync-api</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name/>
+	<description/>
+	<url/>
+	<licenses>
+		<license/>
+	</licenses>
+	<developers>
+		<developer/>
+	</developers>
+	<scm>
+		<connection/>
+		<developerConnection/>
+		<tag/>
+		<url/>
+	</scm>
+
+	<!-- ============================================================
+	     PROPERTIES: variáveis reutilizáveis no resto do arquivo.
+	     Em vez de escrever "1.6.3" em vários lugares, criamos UMA
+	     variável aqui (mapstruct.version) e referenciamos ela com
+	     ${mapstruct.version} sempre que precisarmos dessa versão.
+	     Se um dia precisar atualizar, troca em um único lugar.
+	     ============================================================ -->
+	<properties>
+		<java.version>21</java.version>
+		<mapstruct.version>1.6.3</mapstruct.version>
+	</properties>
+
+	<dependencies>
+		<!-- Spring Data JPA: permite mexer no banco via Entidade + Repository,
+		     sem escrever SQL na mão para operações básicas (CRUD). -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+
+		<!-- Validation: habilita anotações como @NotBlank, @NotNull, @Positive
+		     nos seus DTOs, validadas automaticamente quando o Controller
+		     usa @Valid. -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
+		</dependency>
+
+		<!-- Web: a base de toda API REST. Sem isso não existe Controller,
+		     não existe servidor HTTP embutido (Tomcat), nada. -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+
+		<!-- WebSocket: habilita a infraestrutura de comunicação em tempo real.
+		     É essa dependência que nos dá as classes para criar o canal
+		     de "avisos automáticos" para o cliente (sem ele precisar
+		     perguntar "tem novidade?" toda hora). -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-websocket</artifactId>
+		</dependency>
+
+		<!-- Flyway core: motor de migrations. Controla e versiona as
+		     alterações no schema do banco (V1__, V2__, etc), igual você
+		     já faz nos outros projetos. -->
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
+		</dependency>
+
+		<!-- Flyway database-postgresql: o "dialeto" específico do Flyway
+		     para conversar com PostgreSQL (cada banco tem particularidades). -->
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-database-postgresql</artifactId>
+		</dependency>
+
+		<!-- DevTools: reinicia a aplicação automaticamente quando você salva
+		     uma alteração no código, agilizando o ciclo de desenvolvimento.
+		     scope=runtime: só existe quando a aplicação está rodando, não
+		     entra no build final de produção.
+		     optional=true: quem depender do seu projeto não é obrigado a
+		     herdar essa dependência. -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<scope>runtime</scope>
+			<optional>true</optional>
+		</dependency>
+
+		<!-- Driver do PostgreSQL: a "tradução" entre Java e o banco Postgres.
+		     scope=runtime porque só é necessário quando a aplicação
+		     efetivamente roda e conecta no banco (não em tempo de compilação). -->
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- Lombok: gera automaticamente getters, setters, construtores, etc,
+		     a partir de anotações (@Getter, @Setter, @NoArgsConstructor...).
+		     optional=true: mesma lógica do DevTools, não obriga quem
+		     consumir esse projeto a também usar Lombok. -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<!-- MapStruct (biblioteca): usada em TEMPO DE EXECUÇÃO. É o que
+		     permite escrever interfaces de mapper (ex: CurrencyMapper)
+		     que convertem Entity <-> DTO automaticamente. -->
+		<dependency>
+			<groupId>org.mapstruct</groupId>
+			<artifactId>mapstruct</artifactId>
+			<version>${mapstruct.version}</version>
+		</dependency>
+
+		<!-- MapStruct (processor): usado em TEMPO DE COMPILAÇÃO. É ele quem
+		     "lê" sua interface de mapper e GERA o código Java de implementação
+		     por trás dos panos (você nunca vê esse código, mas ele existe
+		     dentro da pasta target/generated-sources). -->
+		<dependency>
+			<groupId>org.mapstruct</groupId>
+			<artifactId>mapstruct-processor</artifactId>
+			<version>${mapstruct.version}</version>
+		</dependency>
+
+		<!-- Starter de testes: traz JUnit 5, Mockito e AssertJ prontos para uso.
+		     scope=test: só existe durante a execução dos testes, não entra
+		     no jar final da aplicação. -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<!-- Springdoc OpenAPI: gera a documentação interativa da API (Swagger UI)
+     automaticamente, lendo as anotações dos seus Controllers. -->
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>2.8.5</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<!-- ========================================================
+			     PLUGIN 1: spring-boot-maven-plugin
+			     Responsável por empacotar a aplicação no .jar executável
+			     final (aquele que você roda com "java -jar"). A configuração
+			     abaixo exclui o Lombok do jar final, porque o Lombok só é
+			     necessário em tempo de COMPILAÇÃO (ele gera código), não
+			     precisa "viajar" dentro do artefato final.
+			     ======================================================== -->
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<exclude>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+						</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+
+			<!-- ========================================================
+			     PLUGIN 2: maven-compiler-plugin
+			     Responsável por COMPILAR o código Java (.java -> .class).
+			     Aqui é onde configuramos os "annotation processors":
+			     ferramentas que rodam DURANTE a compilação e geram código
+			     extra a partir de anotações (Lombok gera getters/setters,
+			     MapStruct gera implementações de mapper).
+
+			     IMPORTANTE: existem DUAS execuções (executions) diferentes
+			     dentro deste plugin, e cada uma compila uma pasta diferente
+			     do projeto:
+
+			     1) default-compile  -> compila src/main/java
+			        (o código "de produção" da sua aplicação: Controllers,
+			        Services, Entities, etc.)
+
+			     2) default-testCompile -> compila src/test/java
+			        (suas classes de TESTE: @Test, @SpringBootTest, etc.)
+
+			     Cada execução precisa da SUA PRÓPRIA configuração de
+			     annotationProcessorPaths. Configuramos as duas com Lombok +
+			     MapStruct + lombok-mapstruct-binding para garantir que tanto
+			     o código principal quanto os testes consigam usar essas
+			     anotações sem conflito.
+
+			     ORDEM DENTRO DE annotationProcessorPaths (importa!):
+			       1º Lombok               -> gera getters/setters primeiro
+			       2º MapStruct-processor  -> usa esses getters/setters
+			                                  para gerar o código do mapper
+			       3º lombok-mapstruct-binding -> "tradutor" que resolve a
+			                                  corrida/conflito entre os dois
+			                                  processors rodando juntos
+			     ======================================================== -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<executions>
+
+					<!-- Execução 1: compila o código PRINCIPAL (src/main/java) -->
+					<execution>
+						<id>default-compile</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+						<configuration>
+							<annotationProcessorPaths>
+								<path>
+									<groupId>org.projectlombok</groupId>
+									<artifactId>lombok</artifactId>
+								</path>
+								<path>
+									<groupId>org.mapstruct</groupId>
+									<artifactId>mapstruct-processor</artifactId>
+									<version>${mapstruct.version}</version>
+								</path>
+								<path>
+									<groupId>org.projectlombok</groupId>
+									<artifactId>lombok-mapstruct-binding</artifactId>
+									<version>0.2.0</version>
+								</path>
+							</annotationProcessorPaths>
+						</configuration>
+					</execution>
+
+					<!-- Execução 2: compila o código de TESTE (src/test/java) -->
+					<execution>
+						<id>default-testCompile</id>
+						<phase>test-compile</phase>
+						<goals>
+							<goal>testCompile</goal>
+						</goals>
+						<configuration>
+							<annotationProcessorPaths>
+								<path>
+									<groupId>org.projectlombok</groupId>
+									<artifactId>lombok</artifactId>
+								</path>
+								<path>
+									<groupId>org.mapstruct</groupId>
+									<artifactId>mapstruct-processor</artifactId>
+									<version>${mapstruct.version}</version>
+								</path>
+								<path>
+									<groupId>org.projectlombok</groupId>
+									<artifactId>lombok-mapstruct-binding</artifactId>
+									<version>0.2.0</version>
+								</path>
+							</annotationProcessorPaths>
+						</configuration>
+					</execution>
+
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
