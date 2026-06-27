@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Teste WebSocket - Currency Sync</title>
+    <!-- Bibliotecas necessárias para conectar via STOMP + SockJS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+<body>
+<h2>Notificações de Cotação em Tempo Real</h2>
+<ul id="mensagens"></ul>
+
+<script>
+    // 1. Conecta no endpoint que configuramos no WebSocketConfig
+    const socket = new SockJS('http://localhost:8080/ws-currency');
+    const stompClient = Stomp.over(socket);
+
+    // 2. Quando a conexão abrir...
+    stompClient.connect({}, function () {
+        console.log('Conectado ao WebSocket!');
+
+        // 3. "Sintoniza" no tópico que o Service usa para enviar notificações
+        stompClient.subscribe('/topic/currency-updates', function (mensagem) {
+            const dados = JSON.parse(mensagem.body);
+            const item = document.createElement('li');
+            item.textContent = `${dados.code}: ${dados.newRate} (atualizado em ${dados.updatedAt})`;
+            document.getElementById('mensagens').appendChild(item);
+        });
+    });
+</script>
+</body>
+</html>
